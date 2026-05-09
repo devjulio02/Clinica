@@ -1,0 +1,13 @@
+# Arquivos de compilação do Maven
+target/
+
+# Configurações locais do NetBeans (que gerou o nbproject)
+nbproject/
+private/
+
+# Arquivos temporários e de log
+*.log
+*.tmp
+
+# Arquivos do VS Code que são específicos do seu computador
+.vscode/
