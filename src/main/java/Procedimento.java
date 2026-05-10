@@ -10,5 +10,8 @@ public class Procedimento {
 		return this.tipoProcedimento;
 	}
 
+	public float getPreco() {
+		return this.tipoProcedimento.getPreco();
+	}
 }
 

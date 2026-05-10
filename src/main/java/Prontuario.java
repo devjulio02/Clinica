@@ -1,11 +1,6 @@
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Prontuario {
 
@@ -48,28 +43,9 @@ public class Prontuario {
 
 		float valorDiarias = 0.0f;
 
-		// Contabilizar as diárias
+		// Primeira alteração, agora Internação que lida com toda a parte de calculo que aqui existia;
 		if (internacao != null) {
-			switch (internacao.getTipoLeito()) {
-				case ENFERMARIA:
-					if (internacao.getQtdeDias() <= 3) {
-						valorDiarias += 40.00 * internacao.getQtdeDias(); // Internação Básica
-					} else if (internacao.getQtdeDias() <= 8) {
-						valorDiarias += 35.00 * internacao.getQtdeDias(); // Internação Média
-					} else {
-						valorDiarias += 30.00 * internacao.getQtdeDias(); // Internação Grave
-					}
-					break;
-				case APARTAMENTO:
-					if (internacao.getQtdeDias() <= 3) {
-						valorDiarias += 100.00 * internacao.getQtdeDias(); // Internação Básica
-					} else if (internacao.getQtdeDias() <= 8) {
-						valorDiarias += 90.00 * internacao.getQtdeDias();  // Internação Média
-					} else {
-						valorDiarias += 80.00 * internacao.getQtdeDias();  // Internação Grave
-					}
-					break;
-			}
+			valorDiarias = internacao.calcularValorTotal();
 		}
 
 		float valorTotalProcedimentos = 0.00f;
@@ -77,22 +53,19 @@ public class Prontuario {
 		int qtdeProcedimentosComuns = 0;
 		int qtdeProcedimentosAvancados = 0;
 
-		//Contabiliza os procedimentos
+		//Segunda Alteração, agora quem lida com as condições que aqui existiam é a própria classe especialista Procedimento 
 		for (Procedimento procedimento : procedimentos) {
-			switch (procedimento.getTipoProcedimento()) {
+			valorTotalProcedimentos += procedimento.getPreco(); //Somando o valor que o procedimento que sabe quanto custa 
+			//switch case usado para contar a quantidade de cada procedimento para o relatório de texto
+			switch (procedimento.getTipoProcedimento()){
 				case BASICO:
 					qtdeProcedimentosBasicos++;
-					valorTotalProcedimentos += 50.00;
 					break;
-
 				case COMUM:
 					qtdeProcedimentosComuns++;
-					valorTotalProcedimentos += 150.00;
 					break;
-
 				case AVANCADO:
 					qtdeProcedimentosAvancados++;
-					valorTotalProcedimentos += 500.00;
 					break;
 			}
 		}
@@ -102,8 +75,7 @@ public class Prontuario {
 
 		if (internacao != null) {
 			conta += "\n\nValor Total Diárias:\t\t\t" + formatter.format(valorDiarias);
-			conta += "\n\t\t\t\t\t" + internacao.getQtdeDias() + " diária" + (internacao.getQtdeDias() > 1 ? "s" : "")
-					+ " em " + (internacao.getTipoLeito() == TipoLeito.APARTAMENTO ? "apartamento" : "enfermaria");
+			conta += "\n\t\t\t\t\t" + internacao.getDetalhes(); //substituição de formatação por chamada de método criado na classe Internacao
 		}
 
 		if (procedimentos.size() > 0) {
@@ -120,7 +92,7 @@ public class Prontuario {
 			}
 
 			if (qtdeProcedimentosAvancados > 0) {
-				conta += "\n\t\t\t\t\t" + qtdeProcedimentosAvancados + " procedimento" + (qtdeProcedimentosBasicos > 1 ? "s" : "")
+				conta += "\n\t\t\t\t\t" + qtdeProcedimentosAvancados + " procedimento" + (qtdeProcedimentosAvancados > 1 ? "s" : "")
 						+ " avançado" + (qtdeProcedimentosAvancados > 1 ? "s" : "");
 			}
 		}
@@ -131,86 +103,13 @@ public class Prontuario {
 		return conta;
 	}
 
-	boolean b = false;
-
 	public Prontuario carregueProntuario(String arquivoCsv) throws IOException {
-		Prontuario prontuario = new Prontuario(null);
+        ProntuarioRepository repository = new ProntuarioRepository();
+        return repository.carregueProntuario(arquivoCsv);
+    }
 
-		Path path = Paths.get(arquivoCsv);
-
-		Stream<String> linhas = Files.lines(path);
-
-		linhas.forEach((str) -> {
-			if (b == false) {
-				b = true;
-			} else {
-				System.out.println(str);
-
-				String[] dados = str.split(",");
-
-				String nomePaciente = dados[0].trim();
-
-				TipoLeito tipoLeito = dados[1] != null && !dados[1].trim().isEmpty() ? TipoLeito.valueOf(dados[1].trim()) : null;
-
-				int qtdeDiasInternacao = dados[2] != null && !dados[2].trim().isEmpty() ? Integer.parseInt(dados[2].trim()) : -1;
-
-				TipoProcedimento tipoProcedimento = dados[3] != null && !dados[3].trim().isEmpty() ? TipoProcedimento.valueOf(dados[3].trim()) : null;
-
-				int qtdeProcedimentos = dados.length == 5 && dados[4] != null && !dados[4].trim().isEmpty() ? Integer.parseInt(dados[4].trim()) : -1;
-
-				prontuario.nomePaciente = nomePaciente;
-
-				if (tipoLeito != null && qtdeDiasInternacao > 0) {
-					prontuario.internacao = new Internacao(tipoLeito, qtdeDiasInternacao);
-				}
-
-				if (tipoProcedimento != null && qtdeProcedimentos > 0) {
-					while (qtdeProcedimentos > 0) {
-						prontuario.addProcedimento(new Procedimento(tipoProcedimento));
-						qtdeProcedimentos--;
-					}
-				}
-			}
-		});
-
-		return prontuario;
-	}
-
-	List<String> l = new ArrayList<>();
-
-	public String salveProntuario() throws IOException {
-
-		l.add("nome_paciente,tipo_leito,qtde_dias_internacao,tipo_procedimento,qtde_procedimentos");
-
-		String l1 = nomePaciente + ",";
-
-		if (internacao != null) {
-			l1 += internacao.getTipoLeito() + "," + internacao.getQtdeDias() + ",,";
-			l.add(l1);
-		}
-
-		if (procedimentos.size() > 0) {
-			Map<TipoProcedimento, Long> procedimentosAgrupados = procedimentos.stream().collect(
-					Collectors.groupingBy(Procedimento::getTipoProcedimento, Collectors.counting()));
-
-			List<TipoProcedimento> procedimentosOrdenados = new ArrayList<>(procedimentosAgrupados.keySet());
-			Collections.sort(procedimentosOrdenados);
-
-			for (TipoProcedimento chave : procedimentosOrdenados) {
-				String l2 = nomePaciente + ",,," + chave + "," + procedimentosAgrupados.get(chave);
-				l.add(l2);
-			}
-		}
-
-		if (l.size() == 1) {
-			l1 += ",,,";
-			l.add(l1);
-		}
-
-		Path path = Paths.get(nomePaciente.replaceAll(" ", "_").concat(String.valueOf(System.currentTimeMillis())).concat(".csv"));
-
-		Files.write(path, l);
-
-		return path.toString();
-	}
+    public String salveProntuario() throws IOException {
+        ProntuarioRepository repository = new ProntuarioRepository();
+        return repository.salveProntuario(this); // Passa o próprio prontuário ("this") para ser salvo
+    }
 }
