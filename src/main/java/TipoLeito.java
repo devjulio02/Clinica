@@ -16,11 +16,11 @@ public enum TipoLeito {
     
     public float calcularValorDiarias(int qtdeDias){
         if(qtdeDias <= 3) {
-            return this.precoAte3Dias * qtdeDias;
+            return precoAte3Dias * qtdeDias;
         } else if(qtdeDias <= 8) {
-            return this.precoAte8Dias * qtdeDias;
+            return precoAte8Dias * qtdeDias;
         } else {
-            return this.precoAcima8Dias * qtdeDias;
+            return precoAcima8Dias * qtdeDias;
         }
-    } //Método recebe a quantidade de dias e calcula pelo preço da ENFRMARIA ou APARTAMENTO; 
+    } //Padrão OCP (aberto/fechado) pode colocar novos leitos sem mexer no cálculo;
 }

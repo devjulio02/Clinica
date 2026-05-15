@@ -7,11 +7,11 @@ public class Procedimento {
 	}
 
 	public TipoProcedimento getTipoProcedimento() {
-		return this.tipoProcedimento;
+		return tipoProcedimento;
 	}
 
 	public float getPreco() {
-		return this.tipoProcedimento.getPreco();
-	}
+		return tipoProcedimento.getPreco();
+	} //Baixo Acoplamento: Prontuário não vê o Enum, só pede o preço ao Procedimento;
 }
 

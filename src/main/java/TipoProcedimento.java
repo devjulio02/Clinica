@@ -13,6 +13,6 @@ public enum TipoProcedimento {
 	//Construtor para inicializar o preço de cada procedimento;
 
 	public float getPreco() {
-		return this.preco;
-	}
+		return preco;
+	} //Padrão OCP: Se mudar o preço ou criar outro tipo, só mexe aqui;
 }

@@ -44,6 +44,7 @@ public class Prontuario {
 		float valorDiarias = 0.0f;
 
 		// Primeira alteração, agora Internação que lida com toda a parte de calculo que aqui existia;
+		// Padrão Especialista: Prontuário delega o cálculo para quem tem os dados da estadia;
 		if (internacao != null) {
 			valorDiarias = internacao.calcularValorTotal();
 		}
@@ -54,9 +55,9 @@ public class Prontuario {
 		int qtdeProcedimentosAvancados = 0;
 
 		//Segunda Alteração, agora quem lida com as condições que aqui existiam é a própria classe especialista Procedimento 
-		for (Procedimento procedimento : procedimentos) {
-			valorTotalProcedimentos += procedimento.getPreco(); //Somando o valor que o procedimento que sabe quanto custa 
-			//switch case usado para contar a quantidade de cada procedimento para o relatório de texto
+		for (Procedimento procedimento : procedimentos) { //Baixo Acoplamento: Prontuário não sabe preços, apenas acumula o que o Procedimento retorna;
+			valorTotalProcedimentos += procedimento.getPreco(); //Somando o valor que o procedimento que sabe quanto custa;
+			//switch case usado para contar a quantidade de cada procedimento para o relatório de texto;
 			switch (procedimento.getTipoProcedimento()){
 				case BASICO:
 					qtdeProcedimentosBasicos++;
@@ -74,7 +75,7 @@ public class Prontuario {
 		conta += "\n\nConforme os detalhes abaixo:";
 
 		if (internacao != null) {
-			conta += "\n\nValor Total Diárias:\t\t\t" + formatter.format(valorDiarias);
+			conta += "\n\nValor Total Diárias:\t\t\t" + formatter.format(valorDiarias);// Padrão Especialista/SRP: O Prontuário apenas "monta" o texto que a Internação já formatou;
 			conta += "\n\t\t\t\t\t" + internacao.getDetalhes(); //substituição de formatação por chamada de método criado na classe Internacao
 		}
 
@@ -104,11 +105,13 @@ public class Prontuario {
 	}
 
 	public Prontuario carregueProntuario(String arquivoCsv) throws IOException {
+		//Prontuário mantém a assinatura do método, mas transfere a lógica para o Repository;
         ProntuarioRepository repository = new ProntuarioRepository();
         return repository.carregueProntuario(arquivoCsv);
     }
 
     public String salveProntuario() throws IOException {
+		//SRP: Separação da lógica de Domínio da lógica de Persistência em arquivos;
         ProntuarioRepository repository = new ProntuarioRepository();
         return repository.salveProntuario(this); // Passa o próprio prontuário ("this") para ser salvo
     }

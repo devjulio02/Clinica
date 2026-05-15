@@ -9,20 +9,20 @@ public class Internacao {
 	}
 
 	TipoLeito getTipoLeito() {
-		return this.tipoLeito;
+		return tipoLeito;
 	}
 
 	int getQtdeDias() {
-		return this.qtdeDias;
+		return qtdeDias;
 	}
 
 	public float calcularValorTotal(){
-		return this.tipoLeito.calcularValorDiarias(this.qtdeDias);
-	} //Método especialista (Internacao que é reponsável por calcular o valor da interção)
+		return tipoLeito.calcularValorDiarias(qtdeDias);
+	} //Padrão especialista (GRASP), A internação resolve o cálculo pq tem os dados;
 
 	public String getDetalhes (){
-		String sufixoDias = this.qtdeDias > 1 ? "s" : "";
-		String nomeLeito = this.tipoLeito == TipoLeito.APARTAMENTO ? "apartamento" : "enfermaria";
-		return this.qtdeDias + " diária" + sufixoDias + " em " + nomeLeito;
-	}
+		String sufixoDias = qtdeDias > 1 ? "s" : "";
+		String nomeLeito = tipoLeito == TipoLeito.APARTAMENTO ? "apartamento" : "enfermaria";
+		return qtdeDias + " diária" + sufixoDias + " em " + nomeLeito;
+	} //Padrão SRP (SOLID): A internação cuida da sua própria descrição;
 }
