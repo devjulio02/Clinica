@@ -19,10 +19,4 @@ public class Internacao {
 	public float calcularValorTotal(){
 		return tipoLeito.calcularValorDiarias(qtdeDias);
 	} //Padrão especialista (GRASP), A internação resolve o cálculo pq tem os dados;
-
-	public String getDetalhes (){
-		String sufixoDias = qtdeDias > 1 ? "s" : "";
-		String nomeLeito = tipoLeito == TipoLeito.APARTAMENTO ? "apartamento" : "enfermaria";
-		return qtdeDias + " diária" + sufixoDias + " em " + nomeLeito;
-	} //Padrão SRP (SOLID): A internação cuida da sua própria descrição;
 }

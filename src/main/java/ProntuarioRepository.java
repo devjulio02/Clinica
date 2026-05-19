@@ -9,15 +9,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ProntuarioRepository { //SRP: Classe isolada para cuidar da persistência de dados;
+public class ProntuarioRepository { // SRP: Classe isolada para cuidar da persistência de dados;
 
-    private boolean b = false; //Flag para ignorar o cabeçalho do csv na leitura;
-    private List<String> l = new ArrayList<>(); //Lista temporária para montar as linhas do arquivo;
+    private boolean b = false; // Flag para ignorar o cabeçalho do csv na leitura;
+    private List<String> l = new ArrayList<>(); // Lista temporária para montar as linhas do arquivo;
 
     public Prontuario carregueProntuario(String arquivoCsv) throws IOException {
-            Prontuario prontuario = new Prontuario(null);
-            Path path = Paths.get(arquivoCsv);
-            try (Stream<String> linhas = Files.lines(path)) { //Garante que o arquivo será fechado após o uso;
+        Prontuario prontuario = new Prontuario(null);
+        Path path = Paths.get(arquivoCsv);
+        try (Stream<String> linhas = Files.lines(path)) { // Garante que o arquivo será fechado após o uso;
 
             linhas.forEach((str) -> {
                 if (b == false) {
@@ -26,7 +26,8 @@ public class ProntuarioRepository { //SRP: Classe isolada para cuidar da persist
                     System.out.println(str);
                     String[] dados = str.split(",");
                     String nomePaciente = dados[0].trim();
-                    //conversão de Strings do csv para objetos Enum do sistema;
+                    
+                    // Conversão de Strings do csv para objetos Enum do sistema;
                     TipoLeito tipoLeito = dados[1] != null && !dados[1].trim().isEmpty() 
                         ? TipoLeito.valueOf(dados[1].trim()) : null;
 
@@ -40,7 +41,8 @@ public class ProntuarioRepository { //SRP: Classe isolada para cuidar da persist
                         ? Integer.parseInt(dados[4].trim()) : -1;
 
                     prontuario.setNomePaciente(nomePaciente);
-                    //Reconstrução dos objetos de domínio a partir dos dados brutos;
+                    
+                    // Reconstrução dos objetos de domínio a partir dos dados brutos;
                     if (tipoLeito != null && qtdeDiasInternacao > 0) {
                         prontuario.setInternacao(new Internacao(tipoLeito, qtdeDiasInternacao));
                     }
@@ -62,14 +64,15 @@ public class ProntuarioRepository { //SRP: Classe isolada para cuidar da persist
         l.add("nome_paciente,tipo_leito,qtde_dias_internacao,tipo_procedimento,qtde_procedimentos");
 
         String l1 = prontuario.getNomePaciente() + ",";
-        //O repositório extrai os dados do objeto Prontuario para o csv;
+        
+        // O repositório extrai os dados do objeto Prontuario para o csv;
         if (prontuario.getInternacao() != null) {
             l1 += prontuario.getInternacao().getTipoLeito() + "," + prontuario.getInternacao().getQtdeDias() + ",,";
             l.add(l1);
         }
 
         if (prontuario.getProcedimentos().size() > 0) {
-            //Agrupamento para salvar no csv de forma organizada por tipo;
+            // Agrupamento para salvar no csv de forma organizada por tipo;
             Map<TipoProcedimento, Long> procedimentosAgrupados = prontuario.getProcedimentos().stream().collect(
                     Collectors.groupingBy(Procedimento::getTipoProcedimento, Collectors.counting()));
 
@@ -86,7 +89,8 @@ public class ProntuarioRepository { //SRP: Classe isolada para cuidar da persist
             l1 += ",,,";
             l.add(l1);
         }
-        //geração de nome de arquivo único usando timestamp;
+        
+        // Geração de nome de arquivo único usando timestamp;
         Path path = Paths.get(prontuario.getNomePaciente().replaceAll(" ", "_")
                 .concat(String.valueOf(System.currentTimeMillis())).concat(".csv"));
 
